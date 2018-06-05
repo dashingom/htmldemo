@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Indexed DB Demo</title>
+    
+    <script type="text/javascript">
+        window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
+        
+        window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction
+        window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+        
+        if(!window.indexedDB) {
+            alert("Your browser doesn't supoort stable version of indexedDB");
+        }
+        
+        var request = window.indexedDB.open("myDB", 1);
+        const empData = [
+            {id : "01", name : "Omkar"},
+            {id : "02", name : "Avinash"}
+        ];
+        
+        var db;        
+        
+        request.onerror = function(event) {
+            console.log("Error : ");
+        };
+        
+        request.onsuccess = function(event) {
+            db = request.result;
+            console.log("Success : " + db);
+        };
+        
+        request.onupgradeneeded = function(event) {
+            var db = event.target.result;
+            var objectStore = db.createObjectStore("emp", {keyPath : "id"});
+            for(var i in empData) {
+                objectStore.add(empData[i]);
+            }
+        }
+        
+        function readAll() {
+            var objectStore = db.transaction("emp").objectStore("emp");
+            objectStore.openCursor().onsuccess = function(event) {
+                var cursor = event.target.result;
+                if(cursor) {
+                    alert("id : " + cursor.key + " Name : " + cursor.value.name);
+                    cursor.continue();
+                }
+            };
+        }
+        
+        function add() {
+            var request = db.transaction(["emp"], "readwrite")
+            .objectStore("emp")
+            .add({id : "03", name : "Guru"});
+            
+            request.onsuccess = function(event) {
+                alert("Record added successfully!");
+            }
+            
+            request.onerror = function(event) {
+                alert("Unable to add data\r\n Guru is already exist in your database!");
+            }
+        }
+        
+        function read() {
+            var transaction = db.transaction(["emp"]);
+            var objectStore = transaction.objectStore("emp");
+            var request = objectStore.get("01");
+            
+            request.onerror = function(event) {
+               alert("Unable to retrieve data from database!");
+            };
+            
+            request.onsuccess = function(event) {
+               // Do something with the request.result!
+               if(request.result) {
+                  alert("Name: " + request.result.name);
+               }
+               
+               else {
+                  alert("Omkar couldn't be found in your database!");
+               }
+            };
+         }
+         
+         function remove() {
+            var request = db.transaction(["emp"], "readwrite")
+            .objectStore("emp")
+            .delete("03");
+            
+            request.onsuccess = function(event) {
+               alert("Guru's entry has been removed from your database.");
+            };
+         }
+    
+    </script>
+</head>
+
+<body>
+
+    <button onclick="readAll()">Read All</button>
+    <button onclick="add()">Add</button>
+    <button onclick="read()">Read</button>
+    <button onclick="remove()">Delete</button>
+
+</body>
+
+</html>

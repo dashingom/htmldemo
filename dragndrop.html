@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Drag n Drop Demo</title>
+    
+    <style type="text/css">
+        #myDiv {
+            border: 1px solid #000;
+            height: 70px;
+            width: 350px;
+        }
+    
+    </style>
+    
+    <script type="text/javascript">
+    
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+        
+        function drag(ev) {
+            ev.dataTransfer.setData("om", ev.target.id)
+        }
+        
+        function drop(ev) {
+            var id = ev.dataTransfer.getData("om");
+            ev.target.appendChild(document.getElementById(id));            
+        }
+    </script>
+</head>
+
+<body>
+
+    <div id="myDiv" ondrop="drop(event)" ondragover="allowDrop(event)">
+    </div>
+    
+    <img id="img" src="logo.png" draggable="true" ondragstart="drag(event)" width="330" height="70"/>
+
+</body>
+
+</html>
